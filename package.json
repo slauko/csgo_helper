@@ -1,0 +1,93 @@
+{
+	"name": "csgo-helper",
+	"version": "0.1.0",
+	"main": "main.js",
+	"license": "MIT",
+	"private": true,
+	"build": {
+		"icon": "public/logo512.png",
+		"productName": "csgo-helper",
+		"files": [
+			"build/**/*",
+			"main.js"
+		],
+		"extraMetadata": {
+			"main": "main.js"
+		},
+		"win": {},
+		"linux": {},
+		"mac": {}
+	},
+	"scripts": {
+		"start": "react-scripts start",
+		"build": "react-scripts build",
+		"test": "react-scripts test",
+		"eject": "react-scripts eject",
+		"electron": "wait-on http://localhost:3000 && electron .",
+		"electron-dev": "concurrently \"yarn run start\" \"yarn run electron\"",
+		"preelectron-pack": "yarn run build",
+		"electron-pack": "electron-builder --win portable"
+	},
+	"dependencies": {
+		"@emotion/react": "^11.8.2",
+		"@emotion/styled": "^11.8.1",
+		"@mui/lab": "^5.0.0-alpha.73",
+		"@mui/material": "^5.5.1",
+		"@nut-tree/nut-js": "^2.0.1",
+		"asynckeystate": "^0.0.5",
+		"electron-fetch": "^1.7.4",
+		"electron-overlay-window": "^2.0.1",
+		"electron-serve": "^1.0.0",
+		"react-draggable": "^4.4.4",
+		"react-select": "^5.2.2"
+	},
+	"devDependencies": {
+		"@testing-library/jest-dom": "^5.16.2",
+		"@testing-library/react": "^12.1.4",
+		"@testing-library/user-event": "^13.5.0",
+		"concurrently": "^7.0.0",
+		"electron": "^17.1.2",
+		"electron-builder": "^22.8.0",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2",
+		"react-scripts": "5.0.0",
+		"wait-on": "^6.0.1"
+	},
+	"eslintConfig": {
+		"extends": "react-app"
+	},
+	"browserslist": {
+		"production": [
+			">0.2%",
+			"not dead",
+			"not op_mini all"
+		],
+		"development": [
+			"last 1 chrome version",
+			"last 1 firefox version",
+			"last 1 safari version"
+		]
+	},
+	"keywords": [
+		"cross-platform",
+		"native-app",
+		"installed-app",
+		"desktop-applications",
+		"windows",
+		"linux",
+		"macos",
+		"html",
+		"css",
+		"javascript",
+		"front-end",
+		"declarative",
+		"react",
+		"react-dom",
+		"react-scripts",
+		"electron",
+		"electron-builder",
+		"electron-serve",
+		"concurrently",
+		"wait-on"
+	]
+}
