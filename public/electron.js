@@ -1,9 +1,10 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron');
+const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } = require('electron');
 const { overlayWindow } = require('electron-overlay-window');
 const fetch = require('electron-fetch').default;
 const memory = require('memoryjs');
 const aks = require('asynckeystate');
+
 const serve = require('electron-serve');
 const loadURL = serve({
 	directory: 'build',
@@ -17,6 +18,7 @@ function isDev() {
 }
 
 function createWindow() {
+	let iconPath = path.join(__dirname, 'icon.ico');
 	// Create the browser window.
 	mainWindow = new BrowserWindow({
 		webPreferences: {
@@ -24,9 +26,9 @@ function createWindow() {
 			enableRemoteModule: true,
 			contextIsolation: false,
 		},
+		icon: iconPath,
 		...overlayWindow.WINDOW_OPTS,
 	});
-
 	if (isDev()) {
 		mainWindow.loadURL('http://localhost:3000/');
 		mainWindow.webContents.openDevTools({
@@ -35,55 +37,66 @@ function createWindow() {
 	} else {
 		loadURL(mainWindow);
 	}
-
 	mainWindow.setIgnoreMouseEvents(true, {
 		forward: true,
 	});
 	overlayWindow.attachTo(mainWindow, 'Counter-Strike: Global Offensive - Direct3D 9');
 
+	let appIcon = new Tray(iconPath);
+	appIcon.setToolTip('csgo-helper');
+	let contextMenu = Menu.buildFromTemplate([
+		{
+			label: 'Quit',
+			click: function () {
+				app.isQuiting = true;
+				app.quit();
+			},
+		},
+	]);
+	appIcon.setContextMenu(contextMenu);
+
 	start();
 }
 
+const getGameProcessAndModules = async () => {
+	let process = null;
+	try {
+		process = memory.openProcess('csgo.exe');
+	} catch (e) {
+		console.log('cant find game process!');
+		await new Promise((r) => setTimeout(r, 1000));
+		return await getGameProcessAndModules();
+	}
+	let client = null;
+	try {
+		client = memory.findModule('client.dll', process.th32ProcessID);
+	} catch (e) {
+		console.log('cant find client module!');
+		await new Promise((r) => setTimeout(r, 1000));
+		return await getGameProcessAndModules();
+	}
+	let engine = null;
+	try {
+		engine = memory.findModule('engine.dll', process.th32ProcessID);
+	} catch (e) {
+		console.log('cant find engine module!');
+		await new Promise((r) => setTimeout(r, 1000));
+		return await getGameProcessAndModules();
+	}
+
+	return { process: process, client: client, engine: engine };
+};
+
 const initGame = async () => {
-	const getGameProcessAndModules = async () => {
-		let process = null;
-		try {
-			process = memory.openProcess('csgo.exe');
-		} catch (e) {
-			console.log('cant find game process!');
-			await new Promise((r) => setTimeout(r, 1000));
-			return await getGameProcessAndModules();
-		}
-		let client = null;
-		try {
-			client = memory.findModule('client.dll', process.th32ProcessID);
-		} catch (e) {
-			console.log('cant find client module!');
-			await new Promise((r) => setTimeout(r, 1000));
-			return await getGameProcessAndModules();
-		}
-		let engine = null;
-		try {
-			engine = memory.findModule('engine.dll', process.th32ProcessID);
-		} catch (e) {
-			console.log('cant find engine module!');
-			await new Promise((r) => setTimeout(r, 1000));
-			return await getGameProcessAndModules();
-		}
-
-		return { process: process, client: client, engine: engine };
-	};
-
-	let game = await getGameProcessAndModules();
-
+	let newGame = await getGameProcessAndModules();
 	await fetch('https://raw.githubusercontent.com/frk1/hazedumper/master/csgo.json')
 		.then((res) => {
 			return res.json();
 		})
 		.then((data) => {
-			game = { ...game, offsets: data };
+			newGame = { ...newGame, offsets: data };
 		});
-	return game;
+	return newGame;
 };
 const isGameRunning = () => {
 	const processes = memory.getProcesses();
@@ -113,7 +126,7 @@ let settings = {
 		aimkey: { value: 1, label: 'MB1' },
 		triggerkey: { value: 5, label: 'MX2' },
 	},
-	esp: { lines: false, health: false, ammo: false, boxes: false, armor: false, weapons: false },
+	esp: { lines: false, health: true, ammo: false, boxes: true, armor: true, weapons: false },
 	misc: {
 		menuPosition: { x: 100, y: 100 },
 	},
@@ -121,6 +134,7 @@ let settings = {
 
 const fs = require('fs');
 const { mouse } = require('@nut-tree/nut-js');
+const path = require('path');
 
 const saveSettings = (current) => {
 	settings = current;
@@ -143,7 +157,13 @@ const checkMenuKeyPressed = async () => {
 	if (aks.getAsyncKeyState(aks.codes.vk_Delete)) {
 		menu = !menu;
 		mainWindow.webContents.send('openmenu', menu);
-		mainWindow.setIgnoreMouseEvents(!menu);
+		if (menu) {
+			mainWindow.setIgnoreMouseEvents(false);
+		} else {
+			mainWindow.setIgnoreMouseEvents(true, {
+				forward: true,
+			});
+		}
 		await new Promise((r) => setTimeout(r, 100));
 		return true;
 	}
@@ -214,7 +234,7 @@ const getLocalPlayer = () => {
 	let localPlayerIndex = memory.readMemory(game.process.handle, clientState + game.offsets.signatures.dwClientState_GetLocalPlayer, memory.DWORD);
 
 	let localplayer = entities[localPlayerIndex];
-	if (localPlayer) {
+	if (localplayer) {
 		localplayer.viewAngles = memory.readMemory(game.process.handle, clientState + game.offsets.signatures.dwClientState_ViewAngles, memory.VECTOR3);
 	}
 	return localplayer;
@@ -309,6 +329,11 @@ const getClosestAngle = (view, angles) => {
 };
 const aimbot = async () => {
 	while (game.process) {
+		if (!localPlayer) {
+			await new Promise((r) => setTimeout(r, 100));
+			continue;
+		}
+
 		let view = localPlayer.viewAngles;
 		if (view) {
 			let aimAngles = [];
@@ -351,6 +376,11 @@ const aimbot = async () => {
 
 const triggerbot = async () => {
 	while (game.process) {
+		if (!localPlayer) {
+			await new Promise((r) => setTimeout(r, 100));
+			continue;
+		}
+
 		let cross = localPlayer.crosshairID;
 		let target = entities[cross - 1];
 
@@ -374,17 +404,18 @@ const start = async () => {
 		viewMatrix = getViewMatrix();
 		entities = getEntityList();
 		localPlayer = getLocalPlayer();
+
+		newEnemies = [];
 		if (localPlayer) {
-			newEnemies = [];
 			entities.forEach((entity) => {
 				if (entity.team !== localPlayer.team && entity.health > 0 && entity.dormant === 0) {
 					newEnemies.push(entity);
 				}
 			});
-			enemies = newEnemies;
-
-			render(enemies);
 		}
+		enemies = newEnemies;
+
+		render(enemies);
 		await new Promise((r) => setTimeout(r, 2));
 	}
 

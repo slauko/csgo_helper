@@ -1,1 +1,1 @@
-{"aim":{"fov":20,"smooth":5,"bone":{"value":7,"label":"NECK"},"aimkey":{"value":6,"label":"MX1"},"triggerkey":{"value":5,"label":"MX2"}},"esp":{"lines":false,"health":true,"ammo":false,"boxes":true,"armor":true,"weapons":false},"misc":{"menuPosition":{"x":665,"y":356.0000915527344}}}
+{"aim":{"fov":3,"smooth":10,"bone":{"value":6,"label":"BODY"},"aimkey":{"value":1,"label":"MB1"},"triggerkey":{"value":5,"label":"MX2"}},"esp":{"lines":false,"health":true,"ammo":false,"boxes":true,"armor":true,"weapons":false},"misc":{"menuPosition":{"x":467,"y":272.0000915527344}}}

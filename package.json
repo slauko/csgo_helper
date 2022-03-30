@@ -1,20 +1,25 @@
 {
+	"author": "slauko",
 	"name": "csgo-helper",
-	"version": "0.1.0",
-	"main": "main.js",
+	"description": "small helper tool for csgo",
+	"version": "0.1.1",
+	"main": "public/electron.js",
 	"license": "MIT",
 	"private": true,
 	"build": {
-		"icon": "public/logo512.png",
 		"productName": "csgo-helper",
+		"executableName": "CSGO_Helper",
 		"files": [
 			"build/**/*",
-			"main.js"
+			"public/*"
 		],
-		"extraMetadata": {
-			"main": "main.js"
+		"win": {
+			"icon": "public/icon.ico"
 		},
-		"win": {},
+		"nsis": {
+			"artifactName": "CSGO_Helper Setup.${ext}",
+			"installerIcon": "public/icon.ico"
+		},
 		"linux": {},
 		"mac": {}
 	},
@@ -26,7 +31,7 @@
 		"electron": "wait-on http://localhost:3000 && electron .",
 		"electron-dev": "concurrently \"yarn run start\" \"yarn run electron\"",
 		"preelectron-pack": "yarn run build",
-		"electron-pack": "electron-builder --win portable"
+		"electron-pack": "electron-builder --win"
 	},
 	"dependencies": {
 		"@emotion/react": "^11.8.2",
@@ -38,6 +43,7 @@
 		"electron-fetch": "^1.7.4",
 		"electron-overlay-window": "^2.0.1",
 		"electron-serve": "^1.0.0",
+		"memoryjs": "^3.4.0",
 		"react-draggable": "^4.4.4",
 		"react-select": "^5.2.2"
 	},
