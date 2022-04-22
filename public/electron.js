@@ -171,7 +171,11 @@ const checkMenuKeyPressed = async () => {
 };
 
 const getViewMatrix = () => {
-	let viewMatrixBuffer = memory.readBuffer(game.process.handle, game.client.modBaseAddr + game.offsets.signatures.dwViewMatrix, 64);
+	let viewMatrixBuffer = memory.readBuffer(
+		game.process.handle,
+		game.client.modBaseAddr + game.offsets.signatures.dwViewMatrix,
+		64
+	);
 	let newViewMatrix = [];
 	for (let index = 0; index < 16; index++) {
 		newViewMatrix[index] = viewMatrixBuffer.readFloatLE(index * 4);
@@ -181,19 +185,27 @@ const getViewMatrix = () => {
 
 const getEntityList = () => {
 	let playerCount = 60; // TODO: read it dynamically
-	let entityAddressBuffer = memory.readBuffer(game.process.handle, game.client.modBaseAddr + game.offsets.signatures.dwEntityList, playerCount * 0x10);
+	let entityAddressBuffer = memory.readBuffer(
+		game.process.handle,
+		game.client.modBaseAddr + game.offsets.signatures.dwEntityList,
+		playerCount * 0x10
+	);
 
 	let newEntityList = [];
 	for (let index = 0; index < playerCount; index++) {
+		let entity = null;
 		let entityAddress = entityAddressBuffer.readUInt32LE(index * 0x10);
 		if (entityAddress) {
 			let entityBuffer = memory.readBuffer(game.process.handle, entityAddress, 75000);
-			let entity = {
+			entity = {
 				team: entityBuffer.readUInt32LE(game.offsets.netvars.m_iTeamNum),
 				armor: entityBuffer.readUInt32LE(game.offsets.netvars.m_ArmorValue),
 				health: entityBuffer.readUInt32LE(game.offsets.netvars.m_iHealth),
 				dormant: entityBuffer.readUInt8(game.offsets.signatures.m_bDormant),
-				aimPunch: { x: entityBuffer.readFloatLE(game.offsets.netvars.m_aimPunchAngle), y: entityBuffer.readFloatLE(game.offsets.netvars.m_aimPunchAngle + 4) },
+				aimPunch: {
+					x: entityBuffer.readFloatLE(game.offsets.netvars.m_aimPunchAngle),
+					y: entityBuffer.readFloatLE(game.offsets.netvars.m_aimPunchAngle + 4),
+				},
 				position: {
 					x: entityBuffer.readFloatLE(game.offsets.netvars.m_vecOrigin),
 					y: entityBuffer.readFloatLE(game.offsets.netvars.m_vecOrigin + 4),
@@ -201,7 +213,9 @@ const getEntityList = () => {
 				},
 				viewOffset: entityBuffer.readFloatLE(game.offsets.netvars.m_vecViewOffset + 8),
 				crosshairID: entityBuffer.readUInt32LE(game.offsets.netvars.m_iCrosshairId),
-				FOV: entityBuffer.readUInt32LE(game.offsets.netvars.m_iFOV) || entityBuffer.readUInt32LE(game.offsets.netvars.m_iFOVStart),
+				FOV:
+					entityBuffer.readUInt32LE(game.offsets.netvars.m_iFOV) ||
+					entityBuffer.readUInt32LE(game.offsets.netvars.m_iFOVStart),
 			};
 			entity.bonePos = [];
 			entity.bonePosScreen = [];
@@ -220,9 +234,8 @@ const getEntityList = () => {
 
 			entity.screenPos = worldToScreen(entity.position, viewMatrix);
 			entity.screenHeadPos = entity.bonePosScreen[8];
-
-			newEntityList.push(entity);
 		}
+		newEntityList[index] = entity;
 	}
 
 	return newEntityList;
@@ -230,12 +243,24 @@ const getEntityList = () => {
 
 let clientState = 0;
 const getLocalPlayer = () => {
-	clientState = memory.readMemory(game.process.handle, game.engine.modBaseAddr + game.offsets.signatures.dwClientState, memory.DWORD);
-	let localPlayerIndex = memory.readMemory(game.process.handle, clientState + game.offsets.signatures.dwClientState_GetLocalPlayer, memory.DWORD);
+	clientState = memory.readMemory(
+		game.process.handle,
+		game.engine.modBaseAddr + game.offsets.signatures.dwClientState,
+		memory.DWORD
+	);
+	let localPlayerIndex = memory.readMemory(
+		game.process.handle,
+		clientState + game.offsets.signatures.dwClientState_GetLocalPlayer,
+		memory.DWORD
+	);
 
 	let localplayer = entities[localPlayerIndex];
 	if (localplayer) {
-		localplayer.viewAngles = memory.readMemory(game.process.handle, clientState + game.offsets.signatures.dwClientState_ViewAngles, memory.VECTOR3);
+		localplayer.viewAngles = memory.readMemory(
+			game.process.handle,
+			clientState + game.offsets.signatures.dwClientState_ViewAngles,
+			memory.VECTOR3
+		);
 	}
 	return localplayer;
 };
@@ -243,10 +268,22 @@ const getLocalPlayer = () => {
 const worldToScreen = (worldPos, viewMatrix) => {
 	let screenPos = {};
 	let w = 0.0;
-	screenPos.x = viewMatrix[0] * worldPos.x + viewMatrix[1] * worldPos.y + viewMatrix[2] * worldPos.z + viewMatrix[3];
-	screenPos.y = viewMatrix[4] * worldPos.x + viewMatrix[5] * worldPos.y + viewMatrix[6] * worldPos.z + viewMatrix[7];
+	screenPos.x =
+		viewMatrix[0] * worldPos.x +
+		viewMatrix[1] * worldPos.y +
+		viewMatrix[2] * worldPos.z +
+		viewMatrix[3];
+	screenPos.y =
+		viewMatrix[4] * worldPos.x +
+		viewMatrix[5] * worldPos.y +
+		viewMatrix[6] * worldPos.z +
+		viewMatrix[7];
 
-	w = viewMatrix[12] * worldPos.x + viewMatrix[13] * worldPos.y + viewMatrix[14] * worldPos.z + viewMatrix[15];
+	w =
+		viewMatrix[12] * worldPos.x +
+		viewMatrix[13] * worldPos.y +
+		viewMatrix[14] * worldPos.z +
+		viewMatrix[15];
 	if (w < 0.01) {
 		return false;
 	}
@@ -339,14 +376,22 @@ const aimbot = async () => {
 			let aimAngles = [];
 			enemies.forEach((enemy) => {
 				let aimPos = enemy.bonePos[settings.aim.bone.value];
-				let plaPos = { x: localPlayer.position.x, y: localPlayer.position.y, z: localPlayer.position.z + localPlayer.viewOffset };
+				let plaPos = {
+					x: localPlayer.position.x,
+					y: localPlayer.position.y,
+					z: localPlayer.position.z + localPlayer.viewOffset,
+				};
 
 				let angle = calcAimAngle(plaPos, aimPos);
 				aimAngles.push(angle);
 			});
 			let closestRaw = getClosestAngle(view, aimAngles);
 			if (aks.getAsyncKeyState(settings.aim.aimkey.value) && closestRaw && !menu) {
-				let closest = { x: closestRaw.x - localPlayer.aimPunch.x * 2, y: closestRaw.y - localPlayer.aimPunch.y * 2, z: 0 };
+				let closest = {
+					x: closestRaw.x - localPlayer.aimPunch.x * 2,
+					y: closestRaw.y - localPlayer.aimPunch.y * 2,
+					z: 0,
+				};
 				let distance = getViewAngleDistance(view, closest);
 				if (distance <= settings.aim.fov) {
 					let smooth = settings.aim.smooth;
@@ -366,7 +411,12 @@ const aimbot = async () => {
 
 					let smoothFactor = { x: diff.x / smooth, y: diff.y / smooth };
 					let smoothAngle = { x: view.x + smoothFactor.x, y: view.y + smoothFactor.y, z: 0 };
-					memory.writeMemory(game.process.handle, clientState + game.offsets.signatures.dwClientState_ViewAngles, smoothAngle, memory.VECTOR3);
+					memory.writeMemory(
+						game.process.handle,
+						clientState + game.offsets.signatures.dwClientState_ViewAngles,
+						smoothAngle,
+						memory.VECTOR3
+					);
 				}
 			}
 		}
@@ -384,10 +434,25 @@ const triggerbot = async () => {
 		let cross = localPlayer.crosshairID;
 		let target = entities[cross - 1];
 
-		if (aks.getAsyncKeyState(settings.aim.triggerkey.value) && target && target.team !== localPlayer.team && !menu) {
-			memory.writeMemory(game.process.handle, game.client.modBaseAddr + game.offsets.signatures.dwForceAttack, 5, memory.BYTE);
+		if (
+			aks.getAsyncKeyState(settings.aim.triggerkey.value) &&
+			target &&
+			target.team !== localPlayer.team &&
+			!menu
+		) {
+			memory.writeMemory(
+				game.process.handle,
+				game.client.modBaseAddr + game.offsets.signatures.dwForceAttack,
+				5,
+				memory.BYTE
+			);
 			await new Promise((r) => setTimeout(r, 10));
-			memory.writeMemory(game.process.handle, game.client.modBaseAddr + game.offsets.signatures.dwForceAttack, 4, memory.BYTE);
+			memory.writeMemory(
+				game.process.handle,
+				game.client.modBaseAddr + game.offsets.signatures.dwForceAttack,
+				4,
+				memory.BYTE
+			);
 		}
 		await new Promise((r) => setTimeout(r, 10));
 	}
@@ -407,11 +472,17 @@ const start = async () => {
 
 		newEnemies = [];
 		if (localPlayer) {
-			entities.forEach((entity) => {
-				if (entity.team !== localPlayer.team && entity.health > 0 && entity.dormant === 0) {
+			for (let index = 0; index < entities.length; index++) {
+				const entity = entities[index];
+				if (
+					entity &&
+					entity.team != localPlayer.team &&
+					entity.health > 0 &&
+					entity.dormant === 0
+				) {
 					newEnemies.push(entity);
 				}
-			});
+			}
 		}
 		enemies = newEnemies;
 
