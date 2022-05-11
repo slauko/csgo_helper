@@ -4,6 +4,9 @@ const path = require('path');
 const serve = require('electron-serve');
 const loadURL = serve({directory: 'build'});
 
+const Core = require('./classes/core');
+const {Settings, SaveSettings, LoadSettings} = require('./classes/settings');
+
 let mainWindow;
 function createWindow() {
 	mainWindow = new BrowserWindow({
@@ -30,6 +33,9 @@ function createWindow() {
 	mainWindow.once('ready-to-show', () => {
 		mainWindow.show();
 	});
+
+	const core = new Core(Settings, mainWindow);
+	core.loop();
 }
 
 app.on('ready', createWindow);
@@ -39,14 +45,12 @@ app.on('window-all-closed', () => {
 	}
 });
 
-const {Settings, SaveSettings, LoadSettings} = require('./classes/settings');
 ipcMain.handle('load-settings', async (event, arg) => {
 	return await LoadSettings();
 });
 ipcMain.handle('save-settings', async (event, arg) => {
 	SaveSettings(arg);
 });
-
-const Core = require('./classes/core');
-const core = new Core(Settings);
-core.loop();
+ipcMain.handle('toggle-menu', async (event, arg) => {
+	mainWindow.setIgnoreMouseEvents(arg);
+});

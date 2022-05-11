@@ -10,10 +10,11 @@ const user32 = ffi.Library('user32', {
 });
 
 class Core {
-	constructor(Settings) {
+	constructor(Settings, Overlay) {
 		this.process = null;
 		this.game_object_manager = null;
 		this.settings = Settings;
+		this.overlay = Overlay;
 	}
 	async init() {
 		this.process = new Process('Counter-Strike: Global Offensive - Direct3D 9', 'csgo.exe');
@@ -27,6 +28,9 @@ class Core {
 			const settings = await this.settings();
 			await this.game_object_manager.update();
 
+			if (user32.GetAsyncKeyState(0x2e) & 1) {
+				this.overlay.webContents.send('toggle-menu');
+			}
 			if (user32.GetAsyncKeyState(settings.aimkey)) {
 				this.aimbot();
 			}

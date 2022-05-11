@@ -45,6 +45,19 @@ export const Menu = ({settings, setSettings}) => {
 
 	const [changeAim, setChangeAim] = React.useState(false);
 	const [changeTrigger, setChangeTrigger] = React.useState(false);
+
+	const [open, setOpen] = React.useState(false);
+	React.useEffect(() => {
+		window.ipcRenderer.once('toggle-menu', (event, data) => {
+			window.ipcRenderer.invoke('toggle-menu', open);
+			setOpen(!open);
+		});
+	}, [open]);
+
+	if (!open) {
+		return null;
+	}
+
 	return (
 		<Draggable handle='.Menu .Header' onStop={handleDragStop} position={settings.menupos}>
 			<div className='Menu'>
