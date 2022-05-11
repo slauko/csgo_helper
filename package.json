@@ -5,10 +5,6 @@
 	"version": "0.2.0",
 	"private": true,
 	"main": "public/electron.js",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/slauko/csgo_helper.git"
-	},
 	"build": {
 		"productName": "csgo_helper",
 		"executableName": "CSGO_Helper",
@@ -21,10 +17,7 @@
 		},
 		"nsis": {
 			"artifactName": "CSGO_Helper Setup.${ext}",
-			"installerIcon": "public/icon.ico",
-			"publish": [
-				"github"
-			]
+			"installerIcon": "public/icon.ico"
 		},
 		"linux": {},
 		"mac": {}
@@ -51,7 +44,7 @@
 		"electron": "wait-on http://localhost:3000 && electron .",
 		"electron-dev": "concurrently \"yarn electron\" \"yarn start\"",
 		"preelectron-pack": "yarn build",
-		"electron-pack": "electron-builder --publish always"
+		"electron-pack": "electron-builder"
 	},
 	"eslintConfig": {
 		"extends": [
