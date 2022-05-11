@@ -1,66 +1,41 @@
 {
-	"author": "slauko",
-	"name": "csgo-helper",
-	"description": "small helper tool for csgo",
-	"version": "0.1.1",
-	"main": "public/electron.js",
-	"license": "MIT",
+	"name": "csgo_helper",
+	"version": "0.2.0",
 	"private": true,
+	"main": "public/electron.js",
 	"build": {
-		"productName": "csgo-helper",
-		"executableName": "CSGO_Helper",
+		"productName": "csgo_helper",
 		"files": [
 			"build/**/*",
-			"public/*"
+			"electron.js",
+			"preload.js"
 		],
-		"win": {
-			"icon": "public/icon.ico"
-		},
-		"nsis": {
-			"artifactName": "CSGO_Helper Setup.${ext}",
-			"installerIcon": "public/icon.ico"
-		},
+		"win": {},
 		"linux": {},
 		"mac": {}
+	},
+	"dependencies": {
+		"@nut-tree/nut-js": "^2.0.1",
+		"electron-fetch": "^1.7.4",
+		"electron-serve": "^1.1.0",
+		"ffi-napi": "^4.0.3",
+		"memoryjs": "https://github.com/slauko/memoryjs",
+		"node-fetch": "^3.2.4"
 	},
 	"scripts": {
 		"start": "react-scripts start",
 		"build": "react-scripts build",
-		"test": "react-scripts test",
 		"eject": "react-scripts eject",
 		"electron": "wait-on http://localhost:3000 && electron .",
-		"electron-dev": "concurrently \"yarn run start\" \"yarn run electron\"",
-		"preelectron-pack": "yarn run build",
-		"electron-pack": "electron-builder --win"
-	},
-	"dependencies": {
-		"@emotion/react": "^11.8.2",
-		"@emotion/styled": "^11.8.1",
-		"@mui/lab": "^5.0.0-alpha.73",
-		"@mui/material": "^5.5.1",
-		"@nut-tree/nut-js": "^2.0.1",
-		"asynckeystate": "^0.0.5",
-		"electron-fetch": "^1.7.4",
-		"electron-overlay-window": "^2.0.1",
-		"electron-serve": "^1.0.0",
-		"memoryjs": "^3.4.0",
-		"react-draggable": "^4.4.4",
-		"react-select": "^5.2.2"
-	},
-	"devDependencies": {
-		"@testing-library/jest-dom": "^5.16.2",
-		"@testing-library/react": "^12.1.4",
-		"@testing-library/user-event": "^13.5.0",
-		"concurrently": "^7.0.0",
-		"electron": "^17.1.2",
-		"electron-builder": "^22.8.0",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2",
-		"react-scripts": "5.0.0",
-		"wait-on": "^6.0.1"
+		"electron-dev": "concurrently \"yarn electron\" \"yarn start\"",
+		"preelectron-pack": "yarn build",
+		"electron-pack": "electron-builder"
 	},
 	"eslintConfig": {
-		"extends": "react-app"
+		"extends": [
+			"react-app",
+			"react-app/jest"
+		]
 	},
 	"browserslist": {
 		"production": [
@@ -74,26 +49,17 @@
 			"last 1 safari version"
 		]
 	},
-	"keywords": [
-		"cross-platform",
-		"native-app",
-		"installed-app",
-		"desktop-applications",
-		"windows",
-		"linux",
-		"macos",
-		"html",
-		"css",
-		"javascript",
-		"front-end",
-		"declarative",
-		"react",
-		"react-dom",
-		"react-scripts",
-		"electron",
-		"electron-builder",
-		"electron-serve",
-		"concurrently",
-		"wait-on"
-	]
+	"devDependencies": {
+		"@testing-library/jest-dom": "^5.14.1",
+		"@testing-library/react": "^13.0.0",
+		"@testing-library/user-event": "^13.2.1",
+		"concurrently": "^7.1.0",
+		"electron": "^18.2.0",
+		"electron-builder": "^23.0.3",
+		"react": "^18.1.0",
+		"react-dom": "^18.1.0",
+		"react-scripts": "5.0.1",
+		"wait-on": "^6.0.1",
+		"web-vitals": "^2.1.0"
+	}
 }
