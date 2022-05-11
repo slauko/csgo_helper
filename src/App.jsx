@@ -7,12 +7,12 @@ export const App = () => {
 	React.useEffect(() => {
 		if (settings) {
 			// save to settings file
-			window.ipcRenderer.invoke('save-settings', JSON.stringify(settings, null, 2));
+			window.ipcRenderer.invoke('save-settings', settings);
 		}
 		if (!settings) {
 			// load from settings file
 			window.ipcRenderer.invoke('load-settings').then((result) => {
-				setSettings(JSON.parse(result));
+				setSettings(result);
 			});
 		}
 	}, [settings]);

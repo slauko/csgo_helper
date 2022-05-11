@@ -1,5 +1,5 @@
 const {app, BrowserWindow, ipcMain, Tray, Menu} = require('electron');
-const {autoUpdater} = require('electron-updater');
+//const {autoUpdater} = require('electron-updater');
 const {overlayWindow} = require('electron-overlay-window');
 const path = require('path');
 const serve = require('electron-serve');
@@ -8,14 +8,14 @@ const loadURL = serve({directory: 'build'});
 const Core = require('./classes/core');
 const {Settings, SaveSettings, LoadSettings} = require('./classes/settings');
 
-autoUpdater
-	.checkForUpdatesAndNotify()
-	.then(() => {
-		console.log('Updates are available');
-	})
-	.catch(() => {
-		console.log('No updates available');
-	});
+// autoUpdater
+// 	.checkForUpdatesAndNotify()
+// 	.then(() => {
+// 		console.log('Updates are available');
+// 	})
+// 	.catch(() => {
+// 		console.log('No updates available');
+// 	});
 
 let mainWindow;
 function createWindow() {
