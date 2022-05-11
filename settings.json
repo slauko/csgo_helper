@@ -1,0 +1,14 @@
+{
+  "fov": "30",
+  "smooth": "30",
+  "lines": true,
+  "boxes": true,
+  "health": true,
+  "armor": true,
+  "aimkey": 6,
+  "triggerkey": 5,
+  "menupos": {
+    "x": 65,
+    "y": 68
+  }
+}

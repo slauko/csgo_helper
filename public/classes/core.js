@@ -10,9 +10,10 @@ const user32 = ffi.Library('user32', {
 });
 
 class Core {
-	constructor() {
+	constructor(Settings) {
 		this.process = null;
 		this.game_object_manager = null;
+		this.settings = Settings;
 	}
 	async init() {
 		this.process = new Process('Counter-Strike: Global Offensive - Direct3D 9', 'csgo.exe');
@@ -23,12 +24,13 @@ class Core {
 	async loop() {
 		await this.init();
 		while (await this.process.isRunning()) {
+			const settings = await this.settings();
 			await this.game_object_manager.update();
 
-			if (user32.GetAsyncKeyState(0x06)) {
+			if (user32.GetAsyncKeyState(settings.aimkey)) {
 				this.aimbot();
 			}
-			if (user32.GetAsyncKeyState(0x05)) {
+			if (user32.GetAsyncKeyState(settings.triggerkey)) {
 				this.triggerbot();
 			}
 
@@ -37,6 +39,7 @@ class Core {
 		this.loop();
 	}
 	async aimbot() {
+		const settings = await this.settings();
 		const entities = await this.game_object_manager.entities();
 		const local_player = await this.game_object_manager.localplayer();
 
@@ -52,8 +55,8 @@ class Core {
 			const bone_position = target.bone_position_screen[9];
 			if (bone_position) {
 				const RCS = 2;
-				const FOV = 30;
-				const SMOOTH = Math.max(2, 30);
+				const FOV = settings.fov;
+				const SMOOTH = settings.smooth;
 
 				let {x, y} = bone_position;
 				const distance = await this.getDistance3D(local_player.origin, target.origin);
@@ -97,6 +100,7 @@ class Core {
 			const target = entities[target_index - 1];
 			if (target && target.team != local_player.team) {
 				this.leftclick();
+				await new Promise((resolve) => setTimeout(resolve, 10));
 			}
 		}
 	}
