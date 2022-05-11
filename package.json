@@ -1,17 +1,31 @@
 {
-	"name": "csgo_helper",
+	"author": "slauko",
+	"name": "csgo-helper",
+	"description": "small helper tool for csgo",
 	"version": "0.2.0",
 	"private": true,
 	"main": "public/electron.js",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/slauko/csgo_helper.git"
+	},
 	"build": {
 		"productName": "csgo_helper",
+		"executableName": "CSGO_Helper",
 		"files": [
 			"build/**/*",
-			"classes/**/*",
-			"electron.js",
-			"preload.js"
+			"public/*"
 		],
-		"win": {},
+		"win": {
+			"icon": "public/icon.ico"
+		},
+		"nsis": {
+			"artifactName": "CSGO_Helper Setup.${ext}",
+			"installerIcon": "public/icon.ico",
+			"publish": [
+				"github"
+			]
+		},
 		"linux": {},
 		"mac": {}
 	},
@@ -21,6 +35,7 @@
 		"electron-fetch": "^1.7.4",
 		"electron-overlay-window": "^2.0.1",
 		"electron-serve": "^1.1.0",
+		"electron-updater": "^5.0.1",
 		"ffi-napi": "^4.0.3",
 		"keycode": "^2.2.1",
 		"memoryjs": "https://github.com/slauko/memoryjs",
@@ -36,7 +51,7 @@
 		"electron": "wait-on http://localhost:3000 && electron .",
 		"electron-dev": "concurrently \"yarn electron\" \"yarn start\"",
 		"preelectron-pack": "yarn build",
-		"electron-pack": "electron-builder"
+		"electron-pack": "electron-builder --publish always"
 	},
 	"eslintConfig": {
 		"extends": [

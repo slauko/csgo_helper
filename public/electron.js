@@ -1,4 +1,5 @@
-const {app, BrowserWindow, ipcMain} = require('electron');
+const {app, BrowserWindow, ipcMain, Tray, Menu} = require('electron');
+const {autoUpdater} = require('electron-updater');
 const {overlayWindow} = require('electron-overlay-window');
 const path = require('path');
 const serve = require('electron-serve');
@@ -6,6 +7,15 @@ const loadURL = serve({directory: 'build'});
 
 const Core = require('./classes/core');
 const {Settings, SaveSettings, LoadSettings} = require('./classes/settings');
+
+autoUpdater
+	.checkForUpdatesAndNotify()
+	.then(() => {
+		console.log('Updates are available');
+	})
+	.catch(() => {
+		console.log('No updates available');
+	});
 
 let mainWindow;
 function createWindow() {
@@ -28,6 +38,20 @@ function createWindow() {
 	mainWindow.setIgnoreMouseEvents(true);
 	overlayWindow.attachTo(mainWindow, 'Counter-Strike: Global Offensive - Direct3D 9');
 
+	let iconPath = path.join(__dirname, 'icon.ico');
+	let appIcon = new Tray(iconPath);
+	appIcon.setToolTip('csgo-helper');
+	let contextMenu = Menu.buildFromTemplate([
+		{
+			label: 'Quit',
+			click: function () {
+				app.isQuiting = true;
+				app.quit();
+			},
+		},
+	]);
+
+	appIcon.setContextMenu(contextMenu);
 	mainWindow.on('closed', () => {
 		mainWindow = null;
 	});
