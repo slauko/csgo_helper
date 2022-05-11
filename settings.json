@@ -1,6 +1,6 @@
 {
   "fov": "30",
-  "smooth": "30",
+  "smooth": 30,
   "lines": true,
   "boxes": true,
   "health": true,
@@ -8,7 +8,7 @@
   "aimkey": 6,
   "triggerkey": 5,
   "menupos": {
-    "x": 267,
-    "y": 267
+    "x": 100,
+    "y": 100
   }
 }

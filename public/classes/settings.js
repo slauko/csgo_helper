@@ -19,16 +19,16 @@ const Settings = async () => {
 	return settings;
 };
 const SaveSettings = async (data) => {
-	fs.writeFile('settings.json', data, (err) => {
+	fs.writeFile('settings.json', JSON.stringify(data, null, 2), (err) => {
 		if (err) {
 			console.log(err);
 		}
 	});
-	settings = JSON.parse(data);
+	settings = data;
 };
 const LoadSettings = async () => {
 	try {
-		settings = await fs.readFileSync('settings.json', 'utf8');
+		settings = JSON.parse(await fs.readFileSync('settings.json', 'utf8'));
 		return settings;
 	} catch (error) {
 		return settings;
