@@ -8,12 +8,12 @@ const user32 = ffi.Library('user32', {
 });
 
 class Process {
-	constructor(game_window_name, game_process_name) {
+	constructor(game_window_name, game_process_name, overlay) {
 		this.game_process = null;
 		this.game_window_handle = null;
-
 		this.game_window_name = game_window_name;
 		this.game_process_name = game_process_name;
+		this.overlay = overlay;
 	}
 	async init() {
 		this.game_window_handle = user32.FindWindowA(null, this.game_window_name);

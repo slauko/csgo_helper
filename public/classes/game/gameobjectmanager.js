@@ -32,6 +32,8 @@ class GameObjectManager {
 		this.client_state_local_index = this.client_state_local_index.readUInt32LE(0);
 
 		this.local_player = this.entity_list[this.client_state_local_index];
+
+		return 1;
 	}
 	async entities() {
 		return this.entity_list;

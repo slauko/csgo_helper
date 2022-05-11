@@ -55,7 +55,7 @@ export const Menu = ({settings, setSettings}) => {
 	}, [open]);
 
 	if (!open) {
-		return null;
+		return <></>;
 	}
 
 	return (

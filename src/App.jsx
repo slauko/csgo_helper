@@ -18,13 +18,13 @@ export const App = () => {
 	}, [settings]);
 
 	if (!settings) {
-		return null;
+		return <></>;
 	}
 
 	return (
 		<div className='App'>
-			<Menu settings={settings} setSettings={setSettings} />
 			<Drawings settings={settings} />
+			<Menu settings={settings} setSettings={setSettings} />
 		</div>
 	);
 };

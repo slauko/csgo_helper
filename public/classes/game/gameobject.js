@@ -1,5 +1,5 @@
 const Offsets = require('./offsets.js');
-const WorldToScreen = require('./worldtoscreen.js');
+const {WorldToScreen, WorldToScreenDrawings} = require('./worldtoscreen.js');
 
 class GameObject {
 	constructor(process, address) {
@@ -51,16 +51,14 @@ class GameObject {
 			};
 		}
 
-		const viewmatrix_buffer = await this.process.readMemory(this.offsets.signatures.dwViewMatrix, 64, 'client');
-		let view_matrix = [];
-		for (let i = 0; i < 16; i++) {
-			view_matrix[i] = viewmatrix_buffer.readFloatLE(i * 4);
-		}
 		this.bone_position_screen = [];
+		this.bone_position_screen_drawings = [];
 		for (let i = 0; i < 12; i++) {
-			this.bone_position_screen[i] = await WorldToScreen(this.bone_position[i], this.process, view_matrix);
+			this.bone_position_screen[i] = await WorldToScreen(this.bone_position[i], this.process);
+			this.bone_position_screen_drawings[i] = await WorldToScreenDrawings(this.bone_position[i], this.process);
 		}
-		this.origin_screen = await WorldToScreen(this.origin, this.process, view_matrix);
+		this.origin_screen = await WorldToScreen(this.origin, this.process);
+		this.origin_screen_drawings = await WorldToScreenDrawings(this.origin, this.process);
 	}
 }
 

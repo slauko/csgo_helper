@@ -1,6 +1,7 @@
 const ffi = require('ffi-napi');
 const Process = require('./process');
 const GameObjectManager = require('./game/gameobjectmanager');
+const {update_view_matrix} = require('./game/viewmatrix');
 
 const user32 = ffi.Library('user32', {
 	GetAsyncKeyState: ['int', ['int']],
@@ -17,7 +18,7 @@ class Core {
 		this.overlay = Overlay;
 	}
 	async init() {
-		this.process = new Process('Counter-Strike: Global Offensive - Direct3D 9', 'csgo.exe');
+		this.process = new Process('Counter-Strike: Global Offensive - Direct3D 9', 'csgo.exe', this.overlay);
 		await this.process.init();
 		this.game_object_manager = new GameObjectManager(this.process);
 		await this.game_object_manager.init();
@@ -26,6 +27,7 @@ class Core {
 		await this.init();
 		while (await this.process.isRunning()) {
 			const settings = await this.settings();
+			await update_view_matrix(this.process);
 			await this.game_object_manager.update();
 			this.drawings();
 
@@ -38,7 +40,6 @@ class Core {
 			if (user32.GetAsyncKeyState(settings.triggerkey)) {
 				this.triggerbot();
 			}
-
 			await new Promise((resolve) => setTimeout(resolve, 1));
 		}
 		this.loop();
@@ -114,31 +115,31 @@ class Core {
 		const entities = await this.game_object_manager.entities();
 		const local_player = await this.game_object_manager.localplayer();
 		const settings = await this.settings();
-		const enemies = entities.filter((entity) => entity.team !== local_player.team);
+		const enemies = entities.filter((entity) => entity && entity.health > 0 && entity.team !== local_player.team);
 
-		const window_rect = await this.process.getWindowRect();
-		const window_width = window_rect.right - window_rect.left;
-		const mid_x = window_width / 2;
-		const line_start = {x: mid_x, y: window_rect.bottom};
+		const window_rect = await this.overlay.getBounds();
+		const window_width = window_rect.width;
+		const line_start = {x: window_rect.x + window_width / 2, y: window_rect.y + window_rect.bottom};
 
-		const lines = enemies.map((entity) => {
-			return {start: line_start, end: entity.origin_screen};
-		});
-		const boxes = enemies.map((entity) => {
-			return {start: entity.origin_screen, end: entity.bone_position_screen[8]};
-		});
-		const health = enemies.map((entity) => {
-			return {start: entity.origin_screen, end: entity.bone_position_screen[8], health: entity.health};
-		});
-		const armor = enemies.map((entity) => {
-			return {start: entity.origin_screen, end: entity.bone_position_screen[8], armor: entity.armor};
-		});
+		const lines = enemies
+			.map((entity) => {
+				return {start: line_start, end: entity.origin_screen_drawings};
+			})
+			.filter((object) => object.start && object.end);
+		const boxes = enemies
+			.map((entity) => {
+				return {
+					start: entity.origin_screen_drawings,
+					end: entity.bone_position_screen_drawings[8],
+					health: entity.health,
+					armor: entity.armor,
+				};
+			})
+			.filter((object) => object.start && object.end);
 
 		const data = {
 			lines,
 			boxes,
-			health,
-			armor,
 		};
 
 		this.overlay.webContents.send('drawings', data);

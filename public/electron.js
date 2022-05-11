@@ -16,6 +16,7 @@ function createWindow() {
 		},
 		...overlayWindow.WINDOW_OPTS,
 	});
+	mainWindow.maximize();
 	if (!app.isPackaged) {
 		mainWindow.loadURL('http://localhost:3000');
 		mainWindow.webContents.openDevTools({
