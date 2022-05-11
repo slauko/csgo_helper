@@ -27,6 +27,7 @@ class Core {
 		while (await this.process.isRunning()) {
 			const settings = await this.settings();
 			await this.game_object_manager.update();
+			this.drawings();
 
 			if (user32.GetAsyncKeyState(0x2e) & 1) {
 				this.overlay.webContents.send('toggle-menu');
@@ -107,6 +108,40 @@ class Core {
 				await new Promise((resolve) => setTimeout(resolve, 10));
 			}
 		}
+	}
+
+	async drawings() {
+		const entities = await this.game_object_manager.entities();
+		const local_player = await this.game_object_manager.localplayer();
+		const settings = await this.settings();
+		const enemies = entities.filter((entity) => entity.team !== local_player.team);
+
+		const window_rect = await this.process.getWindowRect();
+		const window_width = window_rect.right - window_rect.left;
+		const mid_x = window_width / 2;
+		const line_start = {x: mid_x, y: window_rect.bottom};
+
+		const lines = enemies.map((entity) => {
+			return {start: line_start, end: entity.origin_screen};
+		});
+		const boxes = enemies.map((entity) => {
+			return {start: entity.origin_screen, end: entity.bone_position_screen[8]};
+		});
+		const health = enemies.map((entity) => {
+			return {start: entity.origin_screen, end: entity.bone_position_screen[8], health: entity.health};
+		});
+		const armor = enemies.map((entity) => {
+			return {start: entity.origin_screen, end: entity.bone_position_screen[8], armor: entity.armor};
+		});
+
+		const data = {
+			lines,
+			boxes,
+			health,
+			armor,
+		};
+
+		this.overlay.webContents.send('drawings', data);
 	}
 
 	async getDistance2D(pos1, pos2) {

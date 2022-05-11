@@ -24,6 +24,7 @@ export const App = () => {
 	return (
 		<div className='App'>
 			<Menu settings={settings} setSettings={setSettings} />
+			<Drawings settings={settings} />
 		</div>
 	);
 };

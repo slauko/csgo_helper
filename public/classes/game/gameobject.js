@@ -60,6 +60,7 @@ class GameObject {
 		for (let i = 0; i < 12; i++) {
 			this.bone_position_screen[i] = await WorldToScreen(this.bone_position[i], this.process, view_matrix);
 		}
+		this.origin_screen = await WorldToScreen(this.origin, this.process, view_matrix);
 	}
 }
 
