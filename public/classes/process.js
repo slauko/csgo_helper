@@ -22,9 +22,15 @@ class Process {
 			console.log('Game not found, waiting...');
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 		}
-		this.game_process = memoryjs.openProcess(this.game_process_name);
-		this.game_client = memoryjs.findModule('client.dll', this.game_process.th32ProcessID);
-		this.game_engine = memoryjs.findModule('engine.dll', this.game_process.th32ProcessID);
+		try {
+			this.game_process = memoryjs.openProcess(this.game_process_name);
+			this.game_client = memoryjs.findModule('client.dll', this.game_process.th32ProcessID);
+			this.game_engine = memoryjs.findModule('engine.dll', this.game_process.th32ProcessID);
+		} catch (error) {
+			console.log('Game modules not found, waiting...');
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+			this.init();
+		}
 	}
 	async isRunning() {
 		return user32.FindWindowA(null, this.game_window_name);
