@@ -13,6 +13,7 @@ class GameObject {
 
 		this.offsets = await Offsets();
 		const netvars = this.offsets.netvars;
+		const signatures = this.offsets.signatures;
 		const buffer = await this.process.readMemory(this.address, 100000);
 
 		this.aim_punch_angle = {
@@ -34,8 +35,8 @@ class GameObject {
 		this.armor = buffer.readInt32LE(netvars.m_ArmorValue);
 		this.flags = buffer.readInt32LE(netvars.m_fFlags);
 		this.health = buffer.readInt32LE(netvars.m_iHealth);
-		this.spotted = buffer.readUInt8(netvars.m_bSpotted);
-		this.dormant = buffer.readUInt8(netvars.m_bDormant);
+		this.spotted = buffer.readUIntLE(netvars.m_bSpotted, 1);
+		this.dormant = buffer.readUIntLE(signatures.m_bDormant, 1);
 		this.shots_fired = buffer.readInt32LE(netvars.m_iShotsFired);
 		this.crosshair_id = buffer.readInt32LE(netvars.m_iCrosshairId);
 		this.fov = buffer.readUInt32LE(netvars.m_iFOV) || buffer.readUInt32LE(netvars.m_iFOVStart);

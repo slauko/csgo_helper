@@ -116,8 +116,9 @@ class Core {
 	async drawings() {
 		const entities = await this.game_object_manager.entities();
 		const local_player = await this.game_object_manager.localplayer();
-		const settings = await this.settings();
-		const enemies = entities.filter((entity) => entity && entity.health > 0 && entity.team !== local_player.team);
+		const enemies = entities.filter(
+			(entity) => entity && entity.health > 0 && entity.team !== local_player.team && entity.dormant === 0
+		);
 
 		const window_rect = await this.overlay.getBounds();
 		const window_width = window_rect.width;
