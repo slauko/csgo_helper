@@ -24,7 +24,6 @@ class GameObjectManager {
 			list.push(entity);
 		}
 		this.entity_list = list;
-
 		this.client_state = await this.process.readMemory(this.offsets.signatures.dwClientState, 4, 'engine');
 		this.client_state = this.client_state.readUInt32LE(0);
 		this.client_state_local_index_address = this.client_state + this.offsets.signatures.dwClientState_GetLocalPlayer;
