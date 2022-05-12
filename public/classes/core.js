@@ -24,13 +24,16 @@ class Core {
 		await this.game_object_manager.init();
 	}
 	async loop() {
-		await this.init();
-		while (await this.process.isRunning()) {
+		const running = await this.process?.isRunning();
+		if (!running) {
+			await this.init();
+			console.log('[Core] Initialized');
+		}
+		setTimeout(async () => {
 			const settings = await this.settings();
 			await update_view_matrix(this.process);
 			await this.game_object_manager.update();
 			this.drawings();
-
 			if (user32.GetAsyncKeyState(0x2e) & 1) {
 				this.overlay.webContents.send('toggle-menu');
 			}
@@ -40,9 +43,8 @@ class Core {
 			if (user32.GetAsyncKeyState(settings.triggerkey)) {
 				this.triggerbot();
 			}
-			await new Promise((resolve) => setTimeout(resolve, 1));
-		}
-		this.loop();
+			this.loop();
+		}, 1);
 	}
 	async aimbot() {
 		const settings = await this.settings();

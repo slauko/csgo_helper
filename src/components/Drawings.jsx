@@ -1,4 +1,5 @@
 import React from 'react';
+import FPSStats from 'react-fps-stats';
 export const Drawings = ({settings}) => {
 	const [drawings, setDrawings] = React.useState({});
 	React.useEffect(() => {
@@ -67,6 +68,7 @@ export const Drawings = ({settings}) => {
 						</div>
 					);
 				})}
+			{/* <FPSStats /> */}
 		</div>
 	);
 };
