@@ -11,7 +11,7 @@ class GameObject {
 			return;
 		}
 
-		Offsets().then(async (offsets) => {
+		Offsets().then((offsets) => {
 			this.offsets = offsets;
 			const netvars = this.offsets.netvars;
 			const signatures = this.offsets.signatures;
