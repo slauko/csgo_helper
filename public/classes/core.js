@@ -31,8 +31,8 @@ class Core {
 		}
 		setTimeout(async () => {
 			const settings = await this.settings();
-			await update_view_matrix(this.process);
-			await this.game_object_manager.update();
+			this.game_object_manager.update();
+
 			this.drawings();
 			if (user32.GetAsyncKeyState(0x2e) & 1) {
 				this.overlay.webContents.send('toggle-menu');
@@ -43,6 +43,7 @@ class Core {
 			if (user32.GetAsyncKeyState(settings.triggerkey)) {
 				this.triggerbot();
 			}
+
 			this.loop();
 		}, 1);
 	}
@@ -68,7 +69,7 @@ class Core {
 										const SMOOTH = settings.smooth;
 
 										let {x, y} = bone_position;
-										getDistance3D(local_player.origin, target.origin).then((distance) => {
+										this.getDistance3D(local_player.origin, target.origin).then((distance) => {
 											//get relative values
 											this.process.getWindowRect().then((window_rect) => {
 												const window_width = window_rect.right - window_rect.left;
@@ -107,7 +108,7 @@ class Core {
 				}
 			});
 		});
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await new Promise((resolve) => setTimeout(resolve, 25));
 	}
 	async triggerbot() {
 		this.game_object_manager.entities().then((entities) => {
@@ -125,46 +126,62 @@ class Core {
 				});
 			}
 		});
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		await new Promise((resolve) => setTimeout(resolve, 25));
 	}
 
 	async drawings() {
 		this.game_object_manager.entities().then((entities) => {
-			if (entities.length > 0) {
-				this.game_object_manager.localplayer().then((local_player) => {
-					if (local_player) {
-						const enemies = entities.filter(
-							(entity) => entity && entity.health > 0 && entity.team !== local_player.team && entity.dormant === 0
-						);
-						const window_rect = this.overlay.getBounds();
-						const window_width = window_rect.width;
-						const line_start = {x: window_rect.x + window_width / 2, y: window_rect.y + window_rect.bottom};
-						const lines = enemies
-							.map((entity) => {
-								return {start: line_start, end: entity.origin_screen_drawings};
-							})
-							.filter((object) => object.start && object.end);
+			let screenUpdates = [];
+			update_view_matrix(this.process).then(() => {
+				get_view_matrix().then((view_matrix) => {
+					this.process.getWindowRect().then((window_rect) => {
+						const overlay_rect = this.process.overlay.getBounds();
+						for (const entity of entities) {
+							if (entity) {
+								screenUpdates.push(entity.updateScreen(view_matrix, window_rect, overlay_rect));
+							}
+						}
+						Promise.all(screenUpdates).then(() => {
+							if (entities.length > 0) {
+								this.game_object_manager.localplayer().then((local_player) => {
+									if (local_player) {
+										const enemies = entities.filter(
+											(entity) =>
+												entity && entity.health > 0 && entity.team !== local_player.team && entity.dormant === 0
+										);
+										const line_start = {
+											x: window_rect.x + window_rect.width / 2,
+											y: window_rect.y + window_rect.bottom,
+										};
+										const lines = enemies
+											.map((entity) => {
+												return {start: line_start, end: entity.origin_screen_drawings};
+											})
+											.filter((object) => object.start && object.end);
 
-						const boxes = enemies
-							.map((entity) => {
-								return {
-									start: entity.origin_screen_drawings,
-									end: entity.bone_position_screen_drawings ? entity.bone_position_screen_drawings[8] : false,
-									health: entity.health,
-									armor: entity.armor,
-								};
-							})
-							.filter((object) => object.start && object.end);
+										const boxes = enemies
+											.map((entity) => {
+												return {
+													start: entity.origin_screen_drawings,
+													end: entity.bone_position_screen_drawings[8],
+													health: entity.health,
+													armor: entity.armor,
+												};
+											})
+											.filter((object) => object.start && object.end);
 
-						const data = {
-							lines,
-							boxes,
-						};
-
-						this.overlay.webContents.send('drawings', data);
-					}
+										const data = {
+											lines,
+											boxes,
+										};
+										this.overlay.webContents.send('drawings', data);
+									}
+								});
+							}
+						});
+					});
 				});
-			}
+			});
 		});
 	}
 

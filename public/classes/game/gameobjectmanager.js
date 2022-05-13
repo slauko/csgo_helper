@@ -16,7 +16,9 @@ class GameObjectManager {
 			for (let i = 0; i < 64; i++) {
 				const entity_address = entity_buffer.readUInt32LE(i * 0x10);
 				if (entity_address) {
-					this.entity_list[i] = new GameObject(this.process, entity_address);
+					if (!this.entity_list[i] || this.entity_list[i].address !== entity_address) {
+						this.entity_list[i] = new GameObject(this.process, entity_address);
+					}
 					this.entity_list[i].update();
 				} else {
 					this.entity_list[i] = null;

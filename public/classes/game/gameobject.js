@@ -1,10 +1,16 @@
 const Offsets = require('./offsets.js');
+const {get_view_matrix} = require('./viewmatrix');
 const {WorldToScreen, WorldToScreenDrawings} = require('./worldtoscreen.js');
 
 class GameObject {
 	constructor(process, address) {
 		this.process = process;
 		this.address = address;
+
+		this.bone_position_screen = [];
+		this.bone_position_screen_drawings = [];
+		this.origin_screen = null;
+		this.origin_screen_drawings = null;
 	}
 	async update() {
 		if (!this.address) {
@@ -51,25 +57,40 @@ class GameObject {
 							z: bone_buffer.readFloatLE(i * 0x30 + 0x2c),
 						};
 					}
-					this.bone_position_screen = [];
-					this.bone_position_screen_drawings = [];
-					for (let i = 0; i < 12; i++) {
-						WorldToScreen(this.bone_position[i], this.process).then((screen) => {
-							this.bone_position_screen[i] = screen;
-						});
-						WorldToScreenDrawings(this.bone_position[i], this.process).then((screen) => {
-							this.bone_position_screen_drawings[i] = screen;
-						});
-					}
-				});
-				WorldToScreen(this.origin, this.process).then((origin_screen) => {
-					this.origin_screen = origin_screen;
-				});
-				WorldToScreenDrawings(this.origin, this.process).then((origin_screen_drawings) => {
-					this.origin_screen_drawings = origin_screen_drawings;
 				});
 			});
 		});
+	}
+
+	async updateScreen(view_matrix, window_rect, overlay_rect) {
+		let updates = [];
+		for (let i = 0; i < 12; i++) {
+			if (this.bone_position && this.bone_position[i]) {
+				updates.push(
+					WorldToScreen(this.bone_position[i], view_matrix, window_rect).then((screen_position) => {
+						this.bone_position_screen[i] = screen_position;
+					})
+				);
+				updates.push(
+					WorldToScreenDrawings(this.bone_position[i], view_matrix, overlay_rect).then((screen_position) => {
+						this.bone_position_screen_drawings[i] = screen_position;
+					})
+				);
+			}
+		}
+		if (this.origin) {
+			updates.push(
+				WorldToScreen(this.origin, view_matrix, window_rect).then((screen_position) => {
+					this.origin_screen = screen_position;
+				})
+			);
+			updates.push(
+				WorldToScreenDrawings(this.origin, view_matrix, overlay_rect).then((screen_position) => {
+					this.origin_screen_drawings = screen_position;
+				})
+			);
+		}
+		await Promise.all(updates);
 	}
 }
 

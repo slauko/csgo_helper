@@ -7,7 +7,7 @@ import React from 'react';
 export const Drawings = ({settings}) => {
 	const [drawings, setDrawings] = React.useState({});
 	React.useEffect(() => {
-		window.ipcRenderer.once('drawings', (event, data) => {
+		window.ipcRenderer.on('drawings', (event, data) => {
 			// counter++;
 			// let current = new Date();
 			// let frametime = current - timer;
@@ -22,7 +22,7 @@ export const Drawings = ({settings}) => {
 
 			setDrawings(data);
 		});
-	}, [drawings]);
+	}, []);
 
 	if (!drawings) {
 		return <></>;
