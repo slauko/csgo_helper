@@ -110,19 +110,22 @@ class Core {
 		await new Promise((resolve) => setTimeout(resolve, 10));
 	}
 	async triggerbot() {
-		const entities = await this.game_object_manager.entities();
-		const local_player = await this.game_object_manager.localplayer();
-		if (entities.length === 0 || !local_player) {
-			return;
-		}
-		const target_index = local_player.crosshair_id;
-		if (target_index) {
-			const target = entities[target_index - 1];
-			if (target && target.team != local_player.team) {
-				this.leftclick();
-				await new Promise((resolve) => setTimeout(resolve, 10));
+		this.game_object_manager.entities().then((entities) => {
+			if (entities.length > 0) {
+				this.game_object_manager.localplayer().then((local_player) => {
+					if (local_player) {
+						const target_index = local_player.crosshair_id;
+						if (target_index) {
+							const target = entities[target_index - 1];
+							if (target && target.team != local_player.team) {
+								this.leftclick();
+							}
+						}
+					}
+				});
 			}
-		}
+		});
+		await new Promise((resolve) => setTimeout(resolve, 10));
 	}
 
 	async drawings() {
@@ -182,6 +185,9 @@ class Core {
 		const distances = [];
 		for (const entity of entities) {
 			if (!entity || entity.health <= 0 || !entity.spotted) {
+				continue;
+			}
+			if (!entity.bone_position_screen) {
 				continue;
 			}
 			const bone_position = entity.bone_position_screen[bone_index];
