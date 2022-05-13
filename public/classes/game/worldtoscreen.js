@@ -1,6 +1,4 @@
-const {get_view_matrix} = require('./viewmatrix');
-const WorldToScreen = async (position, process) => {
-	const view_matrix = await get_view_matrix();
+const WorldToScreen = async (position, view_matrix, bounds) => {
 	let screen_position = {};
 	let w = 0.0;
 	screen_position.x =
@@ -17,7 +15,6 @@ const WorldToScreen = async (position, process) => {
 	screen_position.x *= invw;
 	screen_position.y *= invw;
 
-	let bounds = await process.getWindowRect();
 	let width = bounds.right - bounds.left;
 	let height = bounds.bottom - bounds.top;
 	let x = width / 2;
@@ -28,8 +25,8 @@ const WorldToScreen = async (position, process) => {
 	screen_position.y = y + bounds.top;
 	return screen_position;
 };
-const WorldToScreenDrawings = async (position, process) => {
-	const view_matrix = await get_view_matrix();
+
+const WorldToScreenDrawings = async (position, view_matrix, bounds) => {
 	let screen_position = {};
 	let w = 0.0;
 	screen_position.x =
@@ -46,7 +43,6 @@ const WorldToScreenDrawings = async (position, process) => {
 	screen_position.x *= invw;
 	screen_position.y *= invw;
 
-	let bounds = await process.overlay.getBounds();
 	let width = bounds.width;
 	let height = bounds.height;
 	let x = width / 2;

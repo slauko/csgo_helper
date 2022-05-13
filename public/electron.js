@@ -36,6 +36,7 @@ function createWindow() {
 	}
 	mainWindow.setIgnoreMouseEvents(true);
 	overlayWindow.attachTo(mainWindow, 'Counter-Strike: Global Offensive - Direct3D 9');
+	overlayWindow.activateOverlay();
 
 	let iconPath = path.join(__dirname, 'icon.ico');
 	let appIcon = new Tray(iconPath);
