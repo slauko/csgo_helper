@@ -1,7 +1,7 @@
 const ffi = require('ffi-napi');
 const Process = require('./process');
 const GameObjectManager = require('./game/gameobjectmanager');
-const {update_view_matrix} = require('./game/viewmatrix');
+const {update_view_matrix, get_view_matrix} = require('./game/viewmatrix');
 
 const user32 = ffi.Library('user32', {
 	GetAsyncKeyState: ['int', ['int']],
@@ -50,6 +50,9 @@ class Core {
 		const settings = await this.settings();
 		const entities = await this.game_object_manager.entities();
 		const local_player = await this.game_object_manager.localplayer();
+		if (entities.length === 0 || !local_player) {
+			return;
+		}
 
 		const closest = await this.sortClosestToMouse(entities, 9);
 		let target = null;
@@ -103,6 +106,9 @@ class Core {
 	async triggerbot() {
 		const entities = await this.game_object_manager.entities();
 		const local_player = await this.game_object_manager.localplayer();
+		if (entities.length === 0 || !local_player) {
+			return;
+		}
 		const target_index = local_player.crosshair_id;
 		if (target_index) {
 			const target = entities[target_index - 1];
@@ -114,38 +120,43 @@ class Core {
 	}
 
 	async drawings() {
-		const entities = await this.game_object_manager.entities();
-		const local_player = await this.game_object_manager.localplayer();
-		const enemies = entities.filter(
-			(entity) => entity && entity.health > 0 && entity.team !== local_player.team && entity.dormant === 0
-		);
+		this.game_object_manager.entities().then((entities) => {
+			if (entities.length > 0) {
+				this.game_object_manager.localplayer().then((local_player) => {
+					if (local_player) {
+						const enemies = entities.filter(
+							(entity) => entity && entity.health > 0 && entity.team !== local_player.team && entity.dormant === 0
+						);
+						const window_rect = this.overlay.getBounds();
+						const window_width = window_rect.width;
+						const line_start = {x: window_rect.x + window_width / 2, y: window_rect.y + window_rect.bottom};
+						const lines = enemies
+							.map((entity) => {
+								return {start: line_start, end: entity.origin_screen_drawings};
+							})
+							.filter((object) => object.start && object.end);
 
-		const window_rect = await this.overlay.getBounds();
-		const window_width = window_rect.width;
-		const line_start = {x: window_rect.x + window_width / 2, y: window_rect.y + window_rect.bottom};
+						const boxes = enemies
+							.map((entity) => {
+								return {
+									start: entity.origin_screen_drawings,
+									end: entity.bone_position_screen_drawings ? entity.bone_position_screen_drawings[8] : false,
+									health: entity.health,
+									armor: entity.armor,
+								};
+							})
+							.filter((object) => object.start && object.end);
 
-		const lines = enemies
-			.map((entity) => {
-				return {start: line_start, end: entity.origin_screen_drawings};
-			})
-			.filter((object) => object.start && object.end);
-		const boxes = enemies
-			.map((entity) => {
-				return {
-					start: entity.origin_screen_drawings,
-					end: entity.bone_position_screen_drawings[8],
-					health: entity.health,
-					armor: entity.armor,
-				};
-			})
-			.filter((object) => object.start && object.end);
+						const data = {
+							lines,
+							boxes,
+						};
 
-		const data = {
-			lines,
-			boxes,
-		};
-
-		this.overlay.webContents.send('drawings', data);
+						this.overlay.webContents.send('drawings', data);
+					}
+				});
+			}
+		});
 	}
 
 	async getDistance2D(pos1, pos2) {

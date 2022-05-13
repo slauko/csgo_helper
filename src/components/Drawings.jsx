@@ -1,9 +1,25 @@
 import React from 'react';
-import FPSStats from 'react-fps-stats';
+
+// let counter = 0;
+// let timer = new Date();
+// let timercount = 0;
+
 export const Drawings = ({settings}) => {
 	const [drawings, setDrawings] = React.useState({});
 	React.useEffect(() => {
 		window.ipcRenderer.once('drawings', (event, data) => {
+			// counter++;
+			// let current = new Date();
+			// let frametime = current - timer;
+			// timercount += frametime;
+			// if (timercount > 1000) {
+			// 	console.log(`${counter} frames in ${timercount}ms`);
+
+			// 	timercount = 0;
+			// 	counter = 0;
+			// }
+			// timer = current;
+
 			setDrawings(data);
 		});
 	}, [drawings]);
