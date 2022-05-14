@@ -2,7 +2,7 @@
 	"author": "slauko",
 	"name": "csgo-helper",
 	"description": "small helper tool for csgo",
-	"version": "0.2.0",
+	"version": "0.2.5",
 	"private": true,
 	"main": "public/electron.js",
 	"build": {
