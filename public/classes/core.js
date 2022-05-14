@@ -37,11 +37,12 @@ class Core {
 			if (user32.GetAsyncKeyState(0x2e) & 1) {
 				this.overlay.webContents.send('toggle-menu');
 			}
-			if (user32.GetAsyncKeyState(settings.aimkey)) {
-				this.aimbot();
-			}
 			if (user32.GetAsyncKeyState(settings.triggerkey)) {
 				this.triggerbot();
+			} else {
+				if (user32.GetAsyncKeyState(settings.aimkey)) {
+					this.aimbot();
+				}
 			}
 
 			this.loop();
