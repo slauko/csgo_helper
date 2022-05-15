@@ -132,6 +132,9 @@ class Core {
 
 	async drawings() {
 		this.game_object_manager.entities().then((entities) => {
+			if (entities.length === 0) {
+				return this.overlay.webContents.send('drawings', {lines: [], boxes: []});
+			}
 			let screenUpdates = [];
 			update_view_matrix(this.process).then(() => {
 				get_view_matrix().then((view_matrix) => {
@@ -143,44 +146,39 @@ class Core {
 							}
 						}
 						Promise.all(screenUpdates).then(() => {
-							if (entities.length > 0) {
-								this.game_object_manager.localplayer().then((local_player) => {
-									if (local_player) {
-										const enemies = entities.filter(
-											(entity) =>
-												entity && entity.health > 0 && entity.team !== local_player.team && entity.dormant === 0
-										);
-										const line_start = {
-											x: window_rect.x + window_rect.width / 2,
-											y: window_rect.y + window_rect.bottom,
-										};
-										const lines = enemies
-											.map((entity) => {
-												return {start: line_start, end: entity.origin_screen_drawings};
-											})
-											.filter((object) => object.start && object.end);
+							this.game_object_manager.localplayer().then((local_player) => {
+								if (local_player) {
+									const enemies = entities.filter(
+										(entity) => entity && entity.health > 0 && entity.team !== local_player.team && entity.dormant === 0
+									);
+									const line_start = {
+										x: window_rect.x + window_rect.width / 2,
+										y: window_rect.y + window_rect.bottom,
+									};
+									const lines = enemies
+										.map((entity) => {
+											return {start: line_start, end: entity.origin_screen_drawings};
+										})
+										.filter((object) => object.start && object.end);
 
-										const boxes = enemies
-											.map((entity) => {
-												return {
-													start: entity.origin_screen_drawings,
-													end: entity.bone_position_screen_drawings[8],
-													health: entity.health,
-													armor: entity.armor,
-												};
-											})
-											.filter((object) => object.start && object.end);
+									const boxes = enemies
+										.map((entity) => {
+											return {
+												start: entity.origin_screen_drawings,
+												end: entity.bone_position_screen_drawings[8],
+												health: entity.health,
+												armor: entity.armor,
+											};
+										})
+										.filter((object) => object.start && object.end);
 
-										const data = {
-											lines,
-											boxes,
-										};
-										this.overlay.webContents.send('drawings', data);
-									}
-								});
-							} else {
-								this.overlay.webContents.send('drawings', {lines: [], boxes: []});
-							}
+									const data = {
+										lines,
+										boxes,
+									};
+									this.overlay.webContents.send('drawings', data);
+								}
+							});
 						});
 					});
 				});
