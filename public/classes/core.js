@@ -95,8 +95,8 @@ class Core {
 												const fov_check = fov_x_distance + fov_y_distance;
 												if (fov_check < FOV) {
 													//get aim pixels
-													const aim_x = rcs_delta_x / Math.min(Math.max(5, Math.abs(rcs_delta_x)), SMOOTH);
-													const aim_y = rcs_delta_y / Math.min(Math.max(5, Math.abs(rcs_delta_y)), SMOOTH);
+													const aim_x = rcs_delta_x / Math.min(Math.max(10, Math.abs(rcs_delta_x)), SMOOTH);
+													const aim_y = rcs_delta_y / Math.min(Math.max(10, Math.abs(rcs_delta_y)), SMOOTH);
 													this.movemouse(aim_x, aim_y);
 												}
 											});
@@ -178,6 +178,8 @@ class Core {
 										this.overlay.webContents.send('drawings', data);
 									}
 								});
+							} else {
+								this.overlay.webContents.send('drawings', {lines: [], boxes: []});
 							}
 						});
 					});
