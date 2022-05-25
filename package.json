@@ -20,12 +20,7 @@
 			"installerIcon": "public/icon.ico"
 		},
 		"linux": {},
-		"mac": {},
-		"publish": {
-			"provider": "github",
-			"owner": "slauko",
-			"repo": "csgo_helper"
-		}
+		"mac": {}
 	},
 	"dependencies": {
 		"@nut-tree/nut-js": "^2.0.1",
