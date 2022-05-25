@@ -1,14 +1,10 @@
 {
 	"author": "slauko",
-	"name": "csgo-helper",
+	"name": "csgo_helper",
 	"description": "small helper tool for csgo",
 	"version": "0.5.0",
 	"private": true,
 	"main": "public/electron.js",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/slauko/csgo_helper.git"
-	},
 	"build": {
 		"productName": "csgo_helper",
 		"executableName": "CSGO_Helper",
@@ -24,7 +20,12 @@
 			"installerIcon": "public/icon.ico"
 		},
 		"linux": {},
-		"mac": {}
+		"mac": {},
+		"publish": {
+			"provider": "github",
+			"owner": "slauko",
+			"repo": "csgo_helper"
+		}
 	},
 	"dependencies": {
 		"@nut-tree/nut-js": "^2.0.1",
