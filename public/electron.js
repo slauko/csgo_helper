@@ -54,38 +54,44 @@ let aim_active = false;
 let trigger_active = false;
 const {aimbot, triggerbot} = require('./modules/hacks');
 ipcMain.handle('update', async () => {
-	const bounds = mainWindow.getBounds();
-	const entity_list = await get_entity_list();
-	const local_index = await get_local_player_index();
-	const view_matrix = await get_view_matrix();
-	const local_player = entity_list[local_index];
+	try {
+		const bounds = mainWindow.getBounds();
+		const entity_list = await get_entity_list();
+		const local_index = await get_local_player_index();
+		const view_matrix = await get_view_matrix();
+		const local_player = entity_list[local_index];
 
-	// DEL KEY
-	if (GetAsyncKeyState(0x2e) & 1) {
-		mainWindow.setIgnoreMouseEvents(menu_active);
-		menu_active = !menu_active;
-		mainWindow.webContents.send('toggle-menu', menu_active);
-	}
-
-	if (settings) {
-		// AIM KEY
-		if (GetAsyncKeyState(settings.aimkey) && !aim_active) {
-			aim_active = true;
-			aimbot(entity_list, local_player, settings, view_matrix, bounds).then(() => {
-				aim_active = false;
-			});
+		// DEL KEY
+		if (GetAsyncKeyState(0x2e) & 1) {
+			mainWindow.setIgnoreMouseEvents(menu_active);
+			menu_active = !menu_active;
+			mainWindow.webContents.send('toggle-menu', menu_active);
 		}
 
-		// TRIGGER KEY
-		if (GetAsyncKeyState(settings.triggerkey) && !trigger_active) {
-			trigger_active = true;
-			triggerbot(entity_list, local_player).then(() => {
-				trigger_active = false;
-			});
-		}
-	}
+		if (settings) {
+			// AIM KEY
+			if (GetAsyncKeyState(settings.aimkey) && !aim_active) {
+				aim_active = true;
+				aimbot(entity_list, local_player, settings, view_matrix, bounds).then(() => {
+					aim_active = false;
+				});
+			}
 
-	return await get_drawings(entity_list, local_player, view_matrix, bounds);
+			// TRIGGER KEY
+			if (GetAsyncKeyState(settings.triggerkey) && !trigger_active) {
+				trigger_active = true;
+				triggerbot(entity_list, local_player).then(() => {
+					trigger_active = false;
+				});
+			}
+		}
+
+		return await get_drawings(entity_list, local_player, view_matrix, bounds);
+	} catch (error) {
+		console.error(error);
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+		return {boxes: []};
+	}
 });
 
 const {readFileSync, writeFileSync} = require('fs');

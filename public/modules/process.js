@@ -6,7 +6,13 @@ const process_name = 'csgo.exe';
 const process_window_name = 'Counter-Strike: Global Offensive - Direct3D 9';
 
 const Process = async () => {
-	if (process && FindWindow(null, process_window_name)) {
+	if (!FindWindow(null, process_window_name)) {
+		process = null;
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+		return Process();
+	}
+
+	if (process) {
 		return process;
 	}
 
@@ -24,7 +30,8 @@ const Process = async () => {
 		};
 	} catch (error) {
 		console.error(error);
-		setTimeout(Process, 1000);
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+		return Process();
 	}
 
 	return process;
