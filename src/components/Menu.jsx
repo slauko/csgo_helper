@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import Draggable from 'react-draggable';
 import {Col, Row} from 'react-bootstrap';
 import keycode from 'keycode';
@@ -39,24 +39,13 @@ export const Menu = ({settings, setSettings}) => {
 				return null;
 		}
 	};
+
 	const handleDragStop = (e, data) => {
 		setSettings({...settings, menupos: {x: data.x, y: data.y}});
 	};
 
-	const [changeAim, setChangeAim] = React.useState(false);
-	const [changeTrigger, setChangeTrigger] = React.useState(false);
-
-	const [open, setOpen] = React.useState(false);
-	React.useEffect(() => {
-		window.ipcRenderer.once('toggle-menu', (event, data) => {
-			window.ipcRenderer.invoke('toggle-menu', open);
-			setOpen(!open);
-		});
-	}, [open]);
-
-	if (!open) {
-		return <></>;
-	}
+	const [changeAim, setChangeAim] = useState(false);
+	const [changeTrigger, setChangeTrigger] = useState(false);
 
 	return (
 		<Draggable handle='.Menu .Header' onStop={handleDragStop} position={settings.menupos}>
