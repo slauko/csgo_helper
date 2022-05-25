@@ -4,34 +4,9 @@ import React from 'react';
 // let timer = new Date();
 // let timercount = 0;
 
-export const Drawings = ({settings}) => {
-	const [drawings, setDrawings] = React.useState({});
-	React.useEffect(() => {
-		window.ipcRenderer.on('drawings', (event, data) => {
-			// counter++;
-			// let current = new Date();
-			// let frametime = current - timer;
-			// timercount += frametime;
-			// if (timercount > 1000) {
-			// 	console.log(`${counter} frames in ${timercount}ms`);
-
-			// 	timercount = 0;
-			// 	counter = 0;
-			// }
-			// timer = current;
-
-			setDrawings(data);
-		});
-	}, []);
-
-	if (!drawings) {
-		return <></>;
-	}
+export const Drawings = ({drawings, settings}) => {
 	return (
 		<div className='Drawings'>
-			{drawings.lines?.map((line, index) => {
-				return <div key={index} className='Line'></div>;
-			})}
 			{settings.boxes &&
 				drawings.boxes?.map((box, index) => {
 					const box_heigth = (box.start.y - box.end.y) * 1.1;
